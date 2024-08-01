@@ -1,0 +1,589 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!markdown
+
+Tạo lớp Graph
+
+#!csharp
+
+public class Graph
+{
+    public int N { get; set; }
+    public int X { get; set; }
+    public int E { get; set; }
+    public int numEdges;
+    protected LinkedList<Tuple<int, int>> EdgeList;
+    protected List<int>[] AdjList;
+    public int[,] AdjacencyMatrix;
+    public int nRow;
+    public int nCol;
+    public int[,] floydMatrix;
+    public int sVertex;
+    public int eVertex;
+    public bool[] visited;
+    public int[] pre;
+    public int iVertex;
+    protected Tuple<int, int> sNode;
+    public int[] color;
+    public int[] back;
+    public double[] distance;
+}
+
+#!markdown
+
+Interface Bài 1
+
+#!csharp
+
+internal interface CheckEulerVoHuong
+{
+    void CheckEulerVoHuong(string fname);
+}
+
+#!markdown
+
+Bài 1
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai01: Graph, CheckEulerVoHuong
+{
+    public void CheckEulerVoHuong(string fname)
+{
+    ReadAdjMatrix(fname);
+    int k = CheckEulerVoHuong();
+    WriteCheckEuler(k, fname.Substring(0, fname.Length - 3) + "OUT");
+}
+
+public void ReadAdjMatrix(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);
+
+    N = Int32.Parse(lines[0].Trim());
+    Console.WriteLine($"Số đỉnh của ma trận kề : {N}");
+    AdjacencyMatrix = new int[N, N];
+ 
+    for (int i = 1; i <= N; i++)
+    {
+        string[] line = lines[i].Split(' ');
+        for (int j = 0; j < N; j++)
+        {
+            int value = int.Parse(line[j].Trim());
+            AdjacencyMatrix[i - 1, j] = value;
+        }
+    }
+}
+
+
+// Chuyển ma trận kề sang danh sách kề
+// Chuyển ma trận kề sang danh sách kề
+public void ConvertAM2AL()
+{
+    AdjList = new List<int>[N];
+
+    for (int i = 0; i < N; i++)
+    {
+        AdjList[i] = new List<int>(); // Khởi tạo danh sách kề cho mỗi đỉnh
+
+        for (int j = 0; j < N; j++)
+        {
+            if (AdjacencyMatrix[i, j] == 1)
+            {
+                AdjList[i].Add(j + 1); // Thêm đỉnh kề vào danh sách kề của đỉnh i
+        }
+            }
+
+    }
+}
+public int CheckEulerVoHuong()
+{
+    ConvertAM2AL();
+
+    // Đếm số đỉnh có bậc lẻ và bậc chẵn
+    int numOddVertices = 0;
+    for (int i = 0; i < N; i++)
+    {
+        if (AdjList[i].Count % 2 == 1)
+        {
+            numOddVertices++;
+        }
+    }
+
+    // Kiểm tra tính liên thông của đồ thị
+    bool isConnected = IsConnectedGraph();
+
+    // Kiểm tra xem đồ thị có phải là đồ thị Euler không
+    if (isConnected && (numOddVertices == 0 || numOddVertices == 2))
+    {
+        return 1; // Đồ thị có chu trình Euler hoặc đường đi Euler
+    }
+
+    return 0; // Đồ thị không là đồ thị Euler
+}
+public bool IsConnectedGraph()
+{
+    visited = new bool[N];
+    DFS(0); // Bắt đầu từ đỉnh 0
+     for (int i = 0; i < N; i++)
+    {
+     if (!visited[i])
+     {
+         return false; // Trả về false nếu có đỉnh không được thăm hết
+     }
+    }
+
+ return true;
+}
+public void DFS(int vertex)
+{
+    visited[vertex] = true;
+
+    foreach (int neighbor in AdjList[vertex])
+    {
+        if (neighbor >= 0 && neighbor < N && !visited[neighbor])
+        {
+            DFS(neighbor);
+        }
+    }
+}
+public void WriteCheckEuler(int k, string fname)
+{
+    using (StreamWriter file = new StreamWriter(fname))
+    {
+        file.WriteLine(k);
+    }
+}
+}
+
+#!markdown
+
+Chạy Bài 1
+
+#!csharp
+
+Bai01 graph = new Bai01();
+graph.CheckEulerVoHuong("EulerVoHuong.INP");
+
+#!markdown
+
+Interface Bài 2
+
+#!csharp
+
+internal interface CheckEulerCoHuong
+{
+    void CheckEulerCoHuong(string fname);
+}
+
+#!markdown
+
+Bài 2
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai02 : Graph, CheckEulerCoHuong
+{
+    public void CheckEulerCoHuong(string fname)
+    {
+    ReadAdjMatrix(fname);
+    int k = CheckEulerCoHuong();
+    WriteCheckEuler(k, fname.Substring(0, fname.Length - 3) + "OUT");
+}
+private void ReadAdjMatrix(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);
+
+    N = Int32.Parse(lines[0].Trim());
+    Console.WriteLine($"Số đỉnh của ma trận kề : {N}");
+    AdjacencyMatrix = new int[N, N];
+ 
+    for (int i = 1; i <= N; i++)
+    {
+        string[] line = lines[i].Split(' ');
+        for (int j = 0; j < N; j++)
+        {
+            int value = int.Parse(line[j].Trim());
+            AdjacencyMatrix[i - 1, j] = value;
+        }
+    }
+}
+public void WriteCheckEuler(int k, string fname)
+{
+    using (StreamWriter file = new StreamWriter(fname))
+    {
+        file.WriteLine(k);
+    }
+}
+private void ConvertAM2AL()
+{
+    AdjList = new List<int>[N];
+
+    for (int i = 0; i < N; i++)
+    {
+        AdjList[i] = new List<int>(); // Khởi tạo danh sách kề cho mỗi đỉnh
+
+        for (int j = 0; j < N; j++)
+        {
+            if (AdjacencyMatrix[i, j] == 1)
+            {
+                AdjList[i].Add(j + 1); // Thêm đỉnh kề vào danh sách kề của đỉnh i
+            }
+        }
+    }
+}
+public int CheckEulerCoHuong()
+{
+    ConvertAM2AL();
+
+    // Tính bậc của mỗi đỉnh
+    int[] degree = CalcDegree02();
+
+    // Đếm số đỉnh có bậc vào và bậc ra lẻ
+    int oddInDegreeCount = 0;
+    int oddOutDegreeCount = 0;
+
+    for (int i = 0; i < N; i++)
+    {
+        if (degree[i] % 2 != 0)
+            oddInDegreeCount++;
+        if (degree[i + 1] % 2 != 0)
+            oddOutDegreeCount++;
+    }
+
+    // Kiểm tra tính liên thông của đồ thị
+    bool isConnected = IsConnectedGraph();
+
+    // Kiểm tra xem đồ thị có phải là đồ thị Euler không
+    if (isConnected && (oddInDegreeCount == 0 || oddInDegreeCount == 1) && (oddOutDegreeCount == 0 || oddOutDegreeCount == 1))
+    {
+        if (oddInDegreeCount == 1 && oddOutDegreeCount == 1)
+            return 2; // Đồ thị có đường đi Euler
+        else
+            return 1; // Đồ thị có chu trình Euler
+    }
+
+    return 0; // Đồ thị không là đồ thị Euler
+}
+
+public int[] CalcDegree02()
+{
+    int[] deg = new int[N + 1];
+    for (int i = 0; i < N; i++)
+    {
+        deg[i + 1] += AdjList[i].Count;
+        foreach (int v in AdjList[i])
+        {
+            deg[v]++;
+        }
+    }
+    return deg;
+}
+public bool IsConnectedGraph()
+{
+    visited = new bool[N];
+    DFS(0); // Bắt đầu từ đỉnh 0
+
+    // Kiểm tra xem tất cả các đỉnh có được thăm hết không
+    for (int i = 0; i < N; i++)
+    {
+        if (!visited[i])
+        {
+            return false; // Trả về false nếu có đỉnh không được thăm hết
+        }
+    }
+
+    return true;
+}
+public void DFS(int vertex)
+{
+    visited[vertex] = true;
+
+    foreach (int neighbor in AdjList[vertex])
+    {
+        if (neighbor >= 0 && neighbor < N && !visited[neighbor])
+        {
+            DFS(neighbor);
+        }
+    }
+}
+}
+
+#!markdown
+
+Chạy Bài 2
+
+#!csharp
+
+Bai02 graph = new Bai02();
+graph.CheckEulerCoHuong("EulerCoHuong.INP");
+
+#!markdown
+
+Interface Bài 3
+
+#!csharp
+
+internal interface EulerianCycle
+{
+    void EulerianCycle(string fname);
+}
+
+#!markdown
+
+Bài 3
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai03 : Graph, EulerianCycle
+{
+    public void EulerianCycle(string fname)
+{
+    ReadAdjMatrix03(fname);
+    List<int> cycle = EulerianCycle(X);
+    WriteEulerianCycle(cycle, fname.Substring(0, fname.Length - 3) + "OUT");
+}
+
+public List<int> EulerianCycle(int startVertex)
+{
+    Stack<int> stack = new Stack<int>();
+    List<int> cycle = new List<int>();
+    int current = startVertex - 1;
+
+    while (true)
+    {
+        while (current >= 0 && AdjList[current].Count > 0)
+        {
+            stack.Push(current);
+            int pre = current;
+            current = AdjList[current].Last() - 1;
+            AdjList[pre].Remove(AdjList[pre].Last());
+            if (current >= 0 && current < AdjList.Length)
+            {
+                AdjList[current].Remove(pre + 1);
+            }
+        }
+
+        if (stack.Count == 0)
+        {
+            break;
+        }
+
+        current = stack.Pop();
+        cycle.Add(current + 1);
+    }
+
+    cycle.Reverse();
+    cycle.Add(startVertex);
+
+    // Kiểm tra nếu chu trình không đủ lớn hoặc không bắt đầu và kết thúc tại đỉnh startVertex thì không phải là chu trình Euler
+    if (cycle.Count < N + 1 || cycle[0] != startVertex || cycle[cycle.Count - 1] != startVertex)
+    {
+        return new List<int>(); // Trả về danh sách rỗng nếu không phải là chu trình Euler
+    }
+
+    return cycle;
+}
+
+
+public void ReadAdjMatrix03(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);
+
+    string[] firstLine = lines[0].Split(' ');
+    N = Int32.Parse(firstLine[0].Trim());
+    X = Int32.Parse(firstLine[1].Trim());
+
+    Console.WriteLine($"Số đỉnh của ma trận kề : {N}");
+
+    AdjacencyMatrix = new int[N, N];
+
+    for (int i = 1; i <= N; i++)
+    {
+        string[] line = lines[i].Split(' ');
+        for (int j = 0; j < N; j++)
+        {
+            int value = int.Parse(line[j].Trim());
+            AdjacencyMatrix[i - 1, j] = value;
+        }
+    }
+
+    ConvertAM2AL();
+}
+public void ConvertAM2AL()
+{
+    AdjList = new List<int>[N];
+
+    for (int i = 0; i < N; i++)
+    {
+        AdjList[i] = new List<int>(); // Khởi tạo danh sách kề cho mỗi đỉnh
+
+        for (int j = 0; j < N; j++)
+        {
+            if (AdjacencyMatrix[i, j] == 1)
+            {
+                AdjList[i].Add(j + 1); // Thêm đỉnh kề vào danh sách kề của đỉnh i
+            }
+        }
+    }
+}
+
+public void WriteEulerianCycle(List<int> cycle, string fname)
+{
+    using (StreamWriter file = new StreamWriter(fname))
+    {
+        foreach (int v in cycle)
+        {
+            file.Write($"{v} ");
+        }
+    }
+}
+
+}
+
+#!markdown
+
+Chạy Bài 3
+
+#!csharp
+
+Bai03 graph = new Bai03();
+graph.EulerianCycle("ChuTrinhEuler.INP");
+
+#!markdown
+
+Interface Bài 4
+
+#!csharp
+
+internal interface DrawAllEdges
+{
+    void DrawAllEdges(string fname);
+}
+
+#!markdown
+
+Bài 4
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai04 : Graph, DrawAllEdges
+{
+    public void DrawAllEdges(string fname)
+{
+    ReadAdjMatrix(fname);
+    List<List<int>> kList = DrawAllEdges();
+    WriteDrawAllEdges(kList, fname.Substring(0, fname.Length - 3) + "OUT");
+}
+ public void ReadAdjMatrix(string fname)
+ {
+     string[] lines = File.ReadAllLines(fname);
+
+     N = Int32.Parse(lines[0].Trim());
+     Console.WriteLine($"Số đỉnh của ma trận kề : {N}");
+     AdjacencyMatrix = new int[N, N];
+  
+     for (int i = 1; i <= N; i++)
+     {
+         string[] line = lines[i].Split(' ');
+         for (int j = 0; j < N; j++)
+         {
+             int value = int.Parse(line[j].Trim());
+             AdjacencyMatrix[i - 1, j] = value;
+         }
+     }
+ }
+public List<List<int>> DrawAllEdges()
+{
+    List<List<int>> kList = new List<List<int>>();
+
+    // Khởi tạo mảng visited
+    visited = new bool[N];
+
+    // Chuyển ma trận kề sang danh sách kề
+    ConvertAM2AL();
+
+    for (int i = 0; i < N; i++)
+    {
+        if (!visited[i])
+        {
+            List<int> net = new List<int>();
+            DFSForDrawing(i, net);
+            kList.Add(net);
+        }
+    }
+
+    return kList;
+}
+public void ConvertAM2AL()
+{
+    AdjList = new List<int>[N];
+
+    for (int i = 0; i < N; i++)
+    {
+        AdjList[i] = new List<int>(); // Khởi tạo danh sách kề cho mỗi đỉnh
+
+        for (int j = 0; j < N; j++)
+        {
+            if (AdjacencyMatrix[i, j] == 1)
+            {
+                AdjList[i].Add(j + 1); // Thêm đỉnh kề vào danh sách kề của đỉnh i
+            }
+        }
+    }
+}
+
+// DFS để vẽ tất cả các cạnh của đồ thị
+public void DFSForDrawing(int vertex, List<int> net)
+{
+    visited[vertex] = true;
+
+    foreach (int neighbor in AdjList[vertex])
+    {
+        if (neighbor >= 0 && neighbor < N && !visited[neighbor])
+        {
+            net.Add(vertex + 1);
+            net.Add(neighbor + 1);
+            DFSForDrawing(neighbor, net);
+        }
+    }
+}
+
+public void WriteDrawAllEdges(List<List<int>> kList, string fname)
+{
+    using (StreamWriter file = new StreamWriter(fname))
+    {
+        file.WriteLine(kList.Count); 
+        for (int i = 1; i < kList.Count; i++)
+        {
+            foreach (int v in kList[i])
+            {
+                file.Write(String.Format("{0, -3}", v));
+            }
+            file.WriteLine();
+        }
+    }
+}
+}
+
+#!markdown
+
+Chạy Bài 4
+
+#!csharp
+
+Bai04 graph = new Bai04();
+graph.DrawAllEdges("kNet.INP");

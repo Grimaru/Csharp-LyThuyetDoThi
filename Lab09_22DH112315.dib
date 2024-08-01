@@ -1,0 +1,822 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!markdown
+
+Tạo lớp Graph ,Edge,SubSet
+
+#!csharp
+
+public class Graph
+{
+
+    public int N { get; set; }
+    public int x { get; set; }
+    public int WX { get; set; }
+    public int numEdges;
+    protected const int INF = 1000;
+    protected int maxWeight = 0;
+    protected List<Tuple<int, int, int>> listCircle;
+    protected List<List<Tuple<int, int>>> AdjWeghList;
+    protected List<List<Tuple<int, int, int>>> AdjWeghListG2S;
+    protected LinkedList<Tuple<int, int>> EdgeList;
+    public List<List<int>> AdjList;
+    public List<Edge> listWEdges;
+    public List<SubSet> subSets;
+    protected double[,] AdjacencyMatrix;
+    public int nRow;
+    public int nCol;
+    public int[,] floydMatrix;
+    public int sVertex;
+    public int eVertex;
+    public int iVertex;
+    protected Tuple<int, int> sNode;
+    public int[] color;
+    public int[] back;
+    public double[] distance;
+
+    public class SubSet
+    {
+        public SubSet() { }
+        public SubSet(int parent, int rank)
+        {
+            Parent = parent;
+            Rank = rank;
+        }
+        public int Parent { get; set; }
+        public int Rank { get; set; }
+    }
+
+    public class Edge : IEquatable<Edge>, IComparable<Edge>
+    {
+         public List<List<int>> AdjList;
+        public List<Edge> listWEdges;
+        public Edge() { }
+        public Edge(int src, int dst, int w)
+        {
+            Source = src;
+            Destination = dst;
+            Weight = w;
+        }
+
+        public int Source { get; protected set; }
+        public int Destination { get; protected set; }
+        public int Weight { get; protected set; }
+
+        public override string ToString()
+        {
+            return "" + Source + " " + Destination + " " + Weight;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            Edge objAsPart = obj as Edge;
+            if (objAsPart == null) return false;
+            else return Equals(objAsPart);
+        }
+
+        public int CompareTo(Edge compareEdge)
+        {
+            if (compareEdge == null)
+                return 1;
+            if (Weight == compareEdge.Weight)
+            {
+                if (Source < compareEdge.Source)
+                    return -1;
+                if (Source == compareEdge.Source)
+                {
+                    if (Destination < compareEdge.Destination)
+                        return -1;
+                    return 1;
+                }
+                return 1;
+            }
+            return this.Weight.CompareTo(compareEdge.Weight);
+        }
+
+        public bool Equals(Edge other)
+        {
+            if (other == null) return false;
+            return (this.Weight.Equals(other.Weight));
+        }
+    }
+}
+
+#!markdown
+
+Interface bài 1
+
+#!csharp
+
+internal interface SpanningTree
+{
+    void SpanningTree(string fname);
+}
+
+#!markdown
+
+Bài 1
+
+#!csharp
+
+using System;
+using System.IO;
+
+public class Bai01 : Graph, SpanningTree
+{
+public void SpanningTree(string fname)
+{
+    ReadLE2AdjList(fname); 
+    List<int> list = SpanningTree(1);
+    WriteSpanningTree(fname.Substring(0, fname.Length - 3) + "OUT", list); 
+}
+public void ReadLE2AdjList(string fname)
+{
+    string[] lines = System.IO.File.ReadAllLines(fname);
+    string[] line = lines[0].Split(' ');
+    N = Int32.Parse(line[0].Trim());
+    numEdges = Int32.Parse(line[1].Trim());
+    Console.WriteLine("Số đỉnh: " + N);
+    AdjList = new List<List<int>>();
+    for (int i = 0; i < N; i++)
+        AdjList.Add(new List<int>());
+    for (int i = 0; i < numEdges; i++)
+    {
+        line = lines[i + 1].Split(' ');
+        int v1 = Int32.Parse(line[0].Trim());
+        int v2 = Int32.Parse(line[1].Trim());
+        AdjList[v1 - 1].Add(v2);
+        AdjList[v2 - 1].Add(v1);
+    }
+}
+
+public List<int> SpanningTree(int s)
+{
+    List<int> list = new List<int>();
+    Stack<int> stack = new Stack<int>();
+    InitIntArray(); 
+    stack.Push(s);
+    color[s] = 1;
+    while (stack.Count > 0)
+    {
+        int v = stack.Pop();
+        list.Add(v);
+        if (list.Count == N)
+            break;
+        AdjList[v - 1].Reverse();
+        foreach (int vv in AdjList[v - 1])
+        {
+            if (color[vv] == 0)
+            {
+                stack.Push(vv);
+                color[vv] = 1;
+            }
+        }
+        AdjList[v - 1].Reverse();
+    }
+    return list;
+}
+
+public void InitIntArray(int value = -2, int vDistance = INF)
+{
+    color = new int[N + 1];
+    back = new int[N + 1];
+    for (int i = 1; i < color.Length; i++)
+    {
+        color[i] = 0;
+        back[i] = value;
+    }
+    distance = new double[N + 2];
+    for (int i = 1; i < distance.Length; i++)
+        distance[i] = vDistance;
+    distance[N]++;
+}
+protected void WriteSpanningTree(string fname, List<int> list)
+{
+    using (System.IO.StreamWriter file = new System.IO.StreamWriter(fname))
+    {
+        int count = list.Count - 1;
+        file.WriteLine(count);
+        for (int i = 0; i < count; i++)
+            file.WriteLine(String.Format("{0,-3} {1, -3} ", list[i], list[i + 1]));
+    }
+}
+
+}
+
+#!markdown
+
+Chạy Bài 1
+
+#!csharp
+
+Bai01 graph = new Bai01();
+graph.SpanningTree("CayKhung.INP");
+
+#!markdown
+
+Interface Bài 2
+
+#!csharp
+
+internal interface Kruskal_MST
+{
+    void Kruskal_MST(string fname);
+}
+
+#!markdown
+
+Bài 2
+
+#!csharp
+
+using System;
+using System.IO;
+
+public class Bai02 : Graph, Kruskal_MST
+{
+ public void Kruskal_MST(string fname)
+ {
+     ReadEdges(fname);
+     List<Edge> edges = Kruskal();
+     WriteEdges(fname.Substring(0, fname.Length - 3) + "OUT", edges); 
+ }
+ public void ReadEdges(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);
+    string[] line = lines[0].Split(' ');
+
+    N = int.Parse(line[0].Trim());
+    numEdges = int.Parse(line[1].Trim());
+    Console.WriteLine("Số đỉnh: " + N);
+    listWEdges = new List<Edge>();
+    for (int i = 0; i < numEdges; i++)
+    {
+        line = lines[i + 1].Split(' ');
+        int v1 = int.Parse(line[0].Trim()) - 1;
+        int v2 = int.Parse(line[1].Trim()) - 1;
+        int w = int.Parse(line[2].Trim());
+
+        listWEdges.Add(new Edge(v1, v2, w));
+    }
+    listWEdges.Sort();
+}
+
+public List<Edge> Kruskal()
+{
+    List<Edge> res = new List<Edge>();
+    InitSubSets(); 
+
+    listWEdges.Sort((x, y) => x.Weight.CompareTo(y.Weight));
+
+    int target = N - 1;
+    int i = 0;
+    int e = 0;
+    while (e < target)
+    {
+        Edge nextEdge = listWEdges[i++];
+        int x = Find(nextEdge.Source); 
+        int y = Find(nextEdge.Destination); 
+        if (x != y)
+        {
+            res.Add(nextEdge);
+            e++;
+            Union(x, y);
+        }
+    }
+    return res;
+}
+
+
+public void InitSubSets()
+{
+    subSets = new List<SubSet>();
+    for (int i = 0; i < N; i++)
+        subSets.Add(new SubSet(i, 0));
+}
+
+private int Find(int i)
+{
+    if (subSets[i].Parent != i)
+    {
+        subSets[i].Parent = Find(subSets[i].Parent);
+    }
+    return subSets[i].Parent;
+}
+
+public void Union(int x, int y)
+{
+    int xroot = Find(x);
+    int yroot = Find(y);
+
+    if (subSets[xroot].Rank < subSets[yroot].Rank)
+        subSets[xroot].Parent = yroot;
+    else if (subSets[xroot].Rank > subSets[yroot].Rank)
+        subSets[yroot].Parent = xroot;
+    else
+    {
+        subSets[yroot].Parent = xroot;
+        ++subSets[xroot].Rank;
+    }
+}
+
+ private void WriteEdges(string fname, List<Edge> list)
+ {
+     using (StreamWriter file = new StreamWriter(fname))
+     {
+         string res = "";
+         int weight = 0;
+         foreach (Edge e in list)
+         {
+             res += $"{e.Source + 1} {e.Destination + 1} {e.Weight}\n";
+             weight += e.Weight;
+         }
+         file.WriteLine($"{list.Count} {weight}");
+         file.WriteLine(res);
+     }
+ }
+
+}
+
+#!markdown
+
+Chạy Bài 2
+
+#!csharp
+
+Bai02 graph = new Bai02();
+graph.Kruskal_MST("Kruskal.INP"); 
+
+#!markdown
+
+Interface Bài 3
+
+#!csharp
+
+internal interface Prim_MST
+{
+    void Prim_MST(string fname);
+}
+
+#!markdown
+
+Bài 3
+
+#!csharp
+
+using System;
+using System.IO;
+
+public class Bai03 : Graph, Prim_MST
+{
+   
+ public void Prim_MST(string fname)
+ {
+     ReadPrim_MST(fname); 
+     List<Edge> mst = Prim(); 
+     WriteReadPrim_MST(fname.Substring(0, fname.Length - 3) + "OUT", mst); 
+    
+ }
+ public void ReadPrim_MST(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);
+    string[] line = lines[0].Split(' ');
+
+    N = int.Parse(line[0].Trim());
+    numEdges = int.Parse(line[1].Trim());
+    Console.WriteLine("Number of vertices: " + N);
+    listWEdges = new List<Edge>();
+
+    AdjList = new List<List<int>>();
+    for (int i = 0; i < N; i++)
+    {
+        AdjList.Add(new List<int>());
+    }
+
+    for (int i = 0; i < numEdges; i++)
+    {
+        line = lines[i + 1].Split(' ');
+        int v1 = int.Parse(line[0].Trim()) - 1;
+        int v2 = int.Parse(line[1].Trim()) - 1;
+        int w = int.Parse(line[2].Trim());
+
+        listWEdges.Add(new Edge(v1, v2, w));
+
+        AdjList[v1].Add(v2);
+        AdjList[v2].Add(v1);
+    }
+}
+
+public List<Edge> Prim()
+{
+    for (int i = 0; i < N; i++)
+    {
+        AdjList.Add(new List<int>());
+    }
+
+    List<Edge> mst = new List<Edge>(); 
+    HashSet<int> visited = new HashSet<int>();
+    visited.Add(0); 
+
+    
+    for (int i = 1; i < N; i++)
+    {
+        Edge minEdge = null;
+        int minWeight = int.MaxValue;
+
+        foreach (int vertex in visited)
+        {
+            foreach (int neighbor in AdjList[vertex])
+            {
+                if (!visited.Contains(neighbor))
+                {
+                    int weight = GetEdgeWeight(vertex, neighbor);
+                    if (weight != 0 && weight < minWeight)
+                    {
+                        minWeight = weight;
+                        minEdge = new Edge(vertex, neighbor, weight);
+                    }
+                }
+            }
+        }
+
+        if (minEdge != null)
+        {
+            mst.Add(minEdge);
+            visited.Add(minEdge.Destination);
+        }
+    }
+
+    return mst;
+}
+
+public int GetEdgeWeight(int source, int destination)
+{
+    foreach (var edge in listWEdges)
+    {
+        if ((edge.Source == source && edge.Destination == destination) ||
+            (edge.Source == destination && edge.Destination == source))
+        {
+            return edge.Weight;
+        }
+    }
+    return 0; 
+}
+
+public void WriteReadPrim_MST(string fname, List<Edge> list)
+{
+    using (StreamWriter file = new StreamWriter(fname))
+    {
+        string res = "";
+        int weight = 0;
+        foreach (Edge e in list)
+        {
+            res += $"{e.Source + 1} {e.Destination + 1} {e.Weight}\n";
+            weight += e.Weight;
+        }
+        file.WriteLine($"{list.Count} {weight}");
+        file.WriteLine(res);
+    }
+}
+    
+}
+
+#!markdown
+
+Chạy Bài 3
+
+#!csharp
+
+Bai03 graph = new Bai03();
+graph.Prim_MST("Prim.INP"); 
+
+#!markdown
+
+Interface Bài 4
+
+#!csharp
+
+internal interface SpanningTreeX
+{
+    void SpanningTreeX(string fname);
+}
+
+#!markdown
+
+Bài 4
+
+#!csharp
+
+using System;
+using System.IO;
+
+public class Bai04 : Graph, SpanningTreeX
+{
+public void SpanningTreeX(string fname)
+{
+    ReadSpanningTreeX(fname);
+    List<Edge> mst = FindMinimumSpanningTreeX();
+    WriteSpanningTreeX(fname.Substring(0, fname.Length - 3) + "OUT", mst); 
+}
+public void ReadSpanningTreeX(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);
+    string[] info = lines[0].Split(' ');
+    N = int.Parse(info[0]);
+    numEdges = int.Parse(info[1]);
+    x = int.Parse(info[2]);
+    Console.WriteLine("Số đỉnh: " + N);
+    listWEdges = new List<Edge>();
+
+    for (int i = 0; i < numEdges; i++)
+    {
+        string[] edgeInfo = lines[i + 1].Split(' ');
+        int v1 = int.Parse(edgeInfo[0]) - 1;
+        int v2 = int.Parse(edgeInfo[1]) - 1;
+        int w = int.Parse(edgeInfo[2]);
+        listWEdges.Add(new Edge(v1, v2, w));
+    }
+}
+
+public List<Edge> FindMinimumSpanningTreeX()
+{
+    List<Edge> mst = new List<Edge>(); 
+    HashSet<int> visited = new HashSet<int>(); 
+    visited.Add(0); 
+
+    listWEdges.Sort((x, y) => x.Weight.CompareTo(y.Weight));
+
+    int totalWeight = 0;
+
+    foreach (Edge edge in listWEdges)
+    {
+        if (edge.Weight >= x) 
+        {
+            int v1 = edge.Source;
+            int v2 = edge.Destination;
+
+            bool v1InMST = visited.Contains(v1);
+            bool v2InMST = visited.Contains(v2);
+
+            if (v1InMST ^ v2InMST)
+            {
+                mst.Add(edge);
+                totalWeight += edge.Weight;
+                visited.Add(v1);
+                visited.Add(v2);
+            }
+            else if (!v1InMST && !v2InMST)
+            {
+                continue;
+            }
+        }
+    }
+
+    if (totalWeight >= x)
+    {
+        return mst;
+    }
+    else
+    {
+        return new List<Edge>(); 
+    }
+}
+
+private void WriteSpanningTreeX(string fname, List<Edge> mst)
+{
+    using (StreamWriter file = new StreamWriter(fname))
+    {
+        if (mst.Count == 0)
+        {
+            file.WriteLine("-1"); 
+        }
+        else
+        {
+            int totalWeight = mst.Sum(edge => edge.Weight);
+            file.WriteLine(totalWeight); 
+            foreach (Edge edge in mst)
+            {
+                file.WriteLine($"{edge.Source + 1} {edge.Destination + 1} {edge.Weight}");
+            }
+        }
+    }
+}
+
+}
+
+#!markdown
+
+Chạy Bài 4
+
+#!csharp
+
+Bai04 graph = new Bai04();
+graph.SpanningTreeX("CayKhungX.INP");
+
+#!markdown
+
+Interface Bài 5
+
+#!csharp
+
+internal interface VillageRoads
+{
+    void VillageRoads(string fname);
+}
+
+#!markdown
+
+Bài 5
+
+#!csharp
+
+using System;
+using System.IO;
+
+public class Bai05 : Graph, VillageRoads
+{
+ public void VillageRoads(string fname)
+ {
+     ReadRoads(fname); 
+     List<Edge> existingRoads = ReadExistingRoads(fname); 
+     List<Edge> minimumSpanningTree = BuildMinimumSpanningTree(existingRoads); 
+     int totalLength = CalculateTotalLength(minimumSpanningTree); 
+     WriteRoads(fname.Substring(0, fname.Length - 3) + "OUT", totalLength); 
+ }
+
+  public void ReadRoads(string fname)
+ {
+     string[] lines = File.ReadAllLines(fname);
+     N = Int32.Parse(lines[0]);
+
+     Console.WriteLine("Số đỉnh: " + N);
+     AdjacencyMatrix = new double[N, N];
+     for (int i = 0; i < N; i++)
+     {
+         string[] distances = lines[i + 1].Split(' ');
+         for (int j = 0; j < N; j++)
+         {
+             AdjacencyMatrix[i, j] = double.Parse(distances[j]); 
+         }
+     }
+ }
+
+ public List<Edge> ReadExistingRoads(string fname)
+ {
+     List<Edge> existingRoads = new List<Edge>();
+     string[] lines = File.ReadAllLines(fname);
+     int numVillages = int.Parse(lines[0]);
+     int numExistingRoads = int.Parse(lines[numVillages + 1]);
+     for (int i = numVillages + 2; i < numVillages + 2 + numExistingRoads; i++)
+     {
+         string[] roadInfo = lines[i].Split(' ');
+         int village1 = int.Parse(roadInfo[0]) - 1; 
+         int village2 = int.Parse(roadInfo[1]) - 1; 
+         existingRoads.Add(new Edge(village1, village2, (int)AdjacencyMatrix[village1, village2])); 
+     }
+     return existingRoads;
+ }
+
+ public List<Edge> BuildMinimumSpanningTree(List<Edge> existingRoads)
+ {
+     List<Edge> allEdges = GenerateAllEdges(existingRoads); 
+     List<Edge> minimumSpanningTree = Kruskal(existingRoads, allEdges); 
+     return minimumSpanningTree;
+ }
+
+ public List<Edge> GenerateAllEdges(List<Edge> existingRoads)
+ {
+     List<Edge> allEdges = new List<Edge>();
+     for (int i = 0; i < N; i++)
+     {
+         for (int j = i + 1; j < N; j++)
+         {
+             if (AdjacencyMatrix[i, j] != 0 && !existingRoads.Any(r => (r.Source == i && r.Destination == j) || (r.Source == j && r.Destination == i)))
+             {
+                 allEdges.Add(new Edge(i, j, (int)AdjacencyMatrix[i, j]));
+             }
+         }
+     }
+     return allEdges;
+ }
+
+ public List<Edge> Kruskal(List<Edge> existingRoads, List<Edge> allEdges)
+ {
+     List<Edge> edges = new List<Edge>();
+     HashSet<int> visited = new HashSet<int>();
+     foreach (var road in existingRoads)
+     {
+         visited.Add(road.Source);
+         visited.Add(road.Destination);
+     }
+
+     DisjointSetForest dsf = new DisjointSetForest(N);
+     foreach (var edge in existingRoads)
+     {
+         dsf.Union(edge.Source, edge.Destination);
+     }
+
+     allEdges.Sort((x, y) => x.Weight.CompareTo(y.Weight));
+
+     foreach (var edge in allEdges)
+     {
+         if (!dsf.Connected(edge.Source, edge.Destination))
+         {
+             dsf.Union(edge.Source, edge.Destination);
+             edges.Add(edge);
+             visited.Add(edge.Source);
+             visited.Add(edge.Destination);
+         }
+     }
+
+     if (visited.Count < N)
+     {
+         Console.WriteLine("Cannot build roads to connect all villages.");
+         return new List<Edge>();
+     }
+
+     return edges;
+ }
+
+ public int CalculateTotalLength(List<Edge> edges)
+ {
+     int totalLength = edges.Sum(edge => edge.Weight);
+     return totalLength;
+ }
+
+ public void WriteRoads(string fname, int totalLength)
+ {
+    using (StreamWriter file = new StreamWriter(fname))
+    {
+        file.WriteLine(totalLength);
+    }
+ }
+
+
+ public class DisjointSetForest
+ {
+     private int[] parent;
+     private int[] rank;
+
+     public DisjointSetForest(int size)
+     {
+         parent = new int[size];
+         rank = new int[size];
+         for (int i = 0; i < size; i++)
+         {
+             parent[i] = i;
+             rank[i] = 0;
+         }
+     }
+
+     public int Find(int x)
+     {
+         if (parent[x] != x)
+         {
+             parent[x] = Find(parent[x]);
+         }
+         return parent[x];
+     }
+
+     public void Union(int x, int y)
+     {
+         int xRoot = Find(x);
+         int yRoot = Find(y);
+
+         if (xRoot == yRoot)
+         {
+             return;
+         }
+
+         if (rank[xRoot] < rank[yRoot])
+         {
+             parent[xRoot] = yRoot;
+         }
+         else if (rank[xRoot] > rank[yRoot])
+         {
+             parent[yRoot] = xRoot;
+         }
+         else
+         {
+             parent[yRoot] = xRoot;
+             rank[xRoot]++;
+         }
+     }
+
+     public bool Connected(int x, int y)
+     {
+         return Find(x) == Find(y);
+     }
+ }
+}
+
+#!markdown
+
+Chạy Bài 5
+
+#!csharp
+
+Bai05 graph = new Bai05();
+graph.VillageRoads("Roads.INP"); 

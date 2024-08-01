@@ -1,0 +1,821 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!markdown
+
+Tạo lớp Graph
+
+#!csharp
+
+public class Graph
+{
+ public int N { get; set; }
+ public int x1 { get; set; }
+ public int numEdges;
+ protected const int INF = 1000;
+ protected int maxWeight = 0;
+ protected LinkedList<Tuple<int, int>> EdgeList;//
+ protected List<List<Tuple<int, int>>> AdjList;
+ public List<List<int>> AdjList1;
+ public int[,] AdjacencyMatrix;
+ public int[,] floydMatrix;
+ public int sVertex;
+ public int eVertex;
+ public int iVertex;
+ public int[] color;
+ public int[] back;
+ public int[] dist;
+ public bool[] color1;
+protected List<Tuple<int, int, int>> listCircle;
+protected List<List<Tuple<int, int>>> AdjWeghList;
+protected List<List<Tuple<int, int, int>>> AdjWeghListG2S;
+public List<Edge> listWEdges;
+public List<SubSet> subSets;
+protected double[,] AdjacencyMatrix1;
+public int nRow;
+public int nCol;
+protected Tuple<int, int> sNode;
+public double[] distance;
+public class SubSet
+    {
+        public SubSet() { }
+        public SubSet(int parent, int rank)
+        {
+            Parent = parent;
+            Rank = rank;
+        }
+        public int Parent { get; set; }
+        public int Rank { get; set; }
+    }
+
+    public class Edge : IEquatable<Edge>, IComparable<Edge>
+    {
+         public List<List<int>> AdjList;
+        public List<Edge> listWEdges;
+        public Edge() { }
+        public Edge(int src, int dst, int w)
+        {
+            Source = src;
+            Destination = dst;
+            Weight = w;
+        }
+
+        public int Source { get; protected set; }
+        public int Destination { get; protected set; }
+        public int Weight { get; protected set; }
+
+        public override string ToString()
+        {
+            return "" + Source + " " + Destination + " " + Weight;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            Edge objAsPart = obj as Edge;
+            if (objAsPart == null) return false;
+            else return Equals(objAsPart);
+        }
+
+        public int CompareTo(Edge compareEdge)
+        {
+            if (compareEdge == null)
+                return 1;
+            if (Weight == compareEdge.Weight)
+            {
+                if (Source < compareEdge.Source)
+                    return -1;
+                if (Source == compareEdge.Source)
+                {
+                    if (Destination < compareEdge.Destination)
+                        return -1;
+                    return 1;
+                }
+                return 1;
+            }
+            return this.Weight.CompareTo(compareEdge.Weight);
+        }
+
+        public bool Equals(Edge other)
+        {
+            if (other == null) return false;
+            return (this.Weight.Equals(other.Weight));
+        }
+    }
+}
+
+#!markdown
+
+Interface Bài 1
+
+#!csharp
+
+internal interface InterVertexShortesPath
+{
+    void InterVertexShortesPath(string fname);
+}
+
+#!markdown
+
+Bài 1
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai01: Graph, InterVertexShortesPath
+{
+    public void InterVertexShortesPath(string fname)
+    {
+        ReadAdjListIVSP(fname);
+        List<int> list = IVShortestPath();
+        WriteInterVertexShortesPath(fname.Substring(0, fname.Length - 3) + "OUT", list);
+    }
+public void WriteInterVertexShortesPath(string fname, List<int> res)
+{
+    Console.WriteLine("Kết quả: ");
+    using (System.IO.StreamWriter file = new System.IO.StreamWriter(fname))
+    {
+        if (res.Count == 3)
+        {
+            file.WriteLine(String.Format("Không có đường đi từ {0, -3} đến {1, -3}", sVertex + 1, eVertex + 1));
+            System.Console.WriteLine($"Không có đường đi từ {0, -3} đến {1, -3}", sVertex + 1, eVertex + 1);
+        }
+        else
+        {
+            file.WriteLine(String.Format("{0, -3}", res[res.Count - 1]));
+            System.Console.WriteLine(String.Format("{0, -3}", res[res.Count - 1]));
+            int index = 0;
+            foreach (int v in res)
+            {
+                if (index == (res.Count - 1))
+                    break;
+
+                file.Write(String.Format("{0, -3}", v + 1));
+                System.Console.Write(String.Format("{0, -3}", v + 1));
+                index++;
+            }
+            file.WriteLine();
+            System.Console.WriteLine();
+        }
+    }
+}
+ public void ReadAdjListIVSP(string fname)
+ {
+     string[] lines = File.ReadAllLines(fname);
+     string[] line = lines[0].Split(' ');
+     N = int.Parse(line[0].Trim());
+     numEdges = int.Parse(line[1].Trim());
+     sVertex = int.Parse(line[2].Trim()) - 1;
+     eVertex = int.Parse(line[3].Trim()) - 1;
+     iVertex = int.Parse(line[4].Trim()) - 1;
+
+     Console.WriteLine($"Số đỉnh : {N}");
+
+     AdjList = new List<List<Tuple<int, int>>>();
+     for (int i = 0; i < N; i++)
+         AdjList.Add(new List<Tuple<int, int>>());
+
+     for (int i = 0; i < numEdges; i++)
+     {
+         line = lines[i + 1].Trim().Split(' ');
+         int v1 = int.Parse(line[0].Trim()) - 1;
+         int v2 = int.Parse(line[1].Trim()) - 1;
+         int w = int.Parse(line[2].Trim());
+
+         AdjList[v1].Add(new Tuple<int, int>(v2, w));
+         AdjList[v2].Add(new Tuple<int, int>(v1, w));
+     }
+ }
+ public  void Dijkstra()
+ {
+     InitIntArray(-1); 
+
+     int g = sVertex; 
+
+     dist[g] = 0; 
+     back[g] = -1; 
+     do
+     {
+         g = eVertex; 
+
+         for (int i = 0; i < N; i++)
+         {
+             if (color[i] == 0 && dist[g] > dist[i])
+                 g = i;
+         }
+
+         color[g] = 1;
+
+         if (dist[g] == INF || g == eVertex)
+             break;
+
+         foreach (Tuple<int, int> vv in AdjList[g])
+         {
+             if (color[vv.Item1] == 0)
+             {
+                 int d = dist[g] + vv.Item2;
+                 if (dist[vv.Item1] > d)
+                 {
+                     dist[vv.Item1] = d;
+                     back[vv.Item1] = g;
+                 }
+             }
+         }
+     } while (true); 
+ }
+ public  List<int> TracePath()
+ {
+     List<int> res = new List<int>();
+     int currentVertex = eVertex;
+     res.Add(currentVertex);
+
+     while (back[currentVertex] != -1 && currentVertex != sVertex)
+     {
+         currentVertex = back[currentVertex];
+         res.Insert(0, currentVertex);
+     }
+
+     if (currentVertex != sVertex)
+         res.Clear();
+
+     return res;
+ }
+ public List<int> IVShortestPath()
+{
+    int temp = eVertex; 
+    eVertex = iVertex; 
+
+    
+    Dijkstra();
+
+    int distance = dist[eVertex]; 
+    List<int> res = TracePath(); 
+
+    eVertex = temp; 
+    temp = sVertex; 
+    sVertex = iVertex; 
+    for (int i = 0; i < N; i++)
+    {
+        if (!res.Contains(i + 1))
+        {
+            color[i] = 0;
+            back[i] = -2;
+            dist[i] = INF;
+        }
+    }
+
+    color[sVertex] = 0; 
+    SubDijkstra(); 
+    List<int> phase2 = TracePath(); 
+
+    distance += dist[eVertex]; 
+    iVertex = sVertex; 
+    sVertex = temp; 
+
+    res.RemoveAt(res.Count - 1); 
+
+    res.AddRange(phase2); 
+    res.Add(distance); 
+
+    return res; 
+}
+
+public void SubDijkstra()
+{
+    int g = sVertex; 
+    dist[g] = 0; 
+    do
+    {
+        g = eVertex; 
+        for (int i = 0; i < N; i++)
+        {
+            if ((color[i] == 0) && (dist[g] > dist[i]))
+                g = i;
+        }
+        color[g] = 1; 
+        if ((dist[g] == INF) || g == eVertex)
+            break; 
+        foreach (Tuple<int, int> vv in AdjList[g])
+        {
+            if (color[vv.Item1] == 0)
+            {
+                int d = dist[g] + vv.Item2;
+                if (dist[vv.Item1] > d)
+                {
+                    dist[vv.Item1] = d; 
+                    back[vv.Item1] = g; 
+                }
+            }
+        }
+    } while (true); 
+}
+public void InitIntArray(int value = -2)
+ {
+     color = new int[N];
+     back = new int[N];
+     dist = new int[N];
+     for (int i = 0; i < N; i++)
+     {
+         color[i] = 0;
+         back[i] = value;
+         dist[i] = INF;
+     }
+ }
+}
+
+#!markdown
+
+Chạy Bài 1
+
+#!csharp
+
+Bai01 graph = new Bai01();
+ graph.InterVertexShortesPath("NganNhatX.INP");
+
+#!markdown
+
+Interface Bài 2
+
+#!csharp
+
+internal interface GoMargin
+{
+    void GoMargin(string fname);
+}
+
+#!markdown
+
+Bài 2
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai02 : Graph, GoMargin
+{
+    public void GoMargin(string fname)
+    {
+        ReadGoMargin(fname);
+        GoMargin();
+        WriteGoMargin(fname.Substring(0, fname.Length - 3) + "OUT", distance[eVertex]);
+    }
+
+    public void WriteGoMargin(string fname, double value, bool isInt = true)
+    {
+        using (StreamWriter file = new StreamWriter(fname))
+        {
+            if (isInt)
+                file.Write(String.Format("{0:F0}", value));
+            else
+                file.Write(String.Format("{0:F2}", value));
+        }
+    }
+
+    public void GoMargin()
+    {
+        InitBoolArray1(false);
+        InitIntArray1(-1, 1);
+        InitIntArray1(INF, 2);
+        int[] dx = { -1, 0, 0, 1 };
+        int[] dy = { 0, -1, 1, 0 };
+        int g = Point2Num(sNode.Item1, sNode.Item2);
+
+        distance[g] = 0;
+        do
+        {
+            g = eVertex;
+            for (int i = 0; i < N; i++)
+            {
+                if (!color1[i] && distance[g] > distance[i])
+                {
+                    g = i;
+                }
+            }
+            if ((distance[g] == INF) || g == eVertex)
+                break;
+            if (ISMargin(g))
+            {
+                eVertex = g;
+                break;
+            }
+
+            color1[g] = true;
+
+            int xcur = 0;
+            int ycur = 0;
+            Num2Point(g, ref xcur, ref ycur);
+
+            for (int i = 0; i < 4; i++)
+            {
+                int x = xcur + dx[i];
+                int y = ycur + dy[i];
+                if (!InBoard(x, y))
+                    continue;
+
+                int v = Point2Num(x, y);
+                if (!color1[v])
+                {
+                    double d = distance[g] + AdjacencyMatrix[x, y];
+                    if (distance[v] > d)
+                    {
+                        distance[v] = d;
+                        back[v] = g;
+                    }
+                }
+            }
+
+        } while (true);
+    }
+
+    public bool ISMargin(int g)
+    {
+        int i = 0;
+        int j = 0;
+        Num2Point(g, ref i, ref j);
+
+        return (i == 0) || (i == (nRow - 1)) || (j == 0) || (j == nCol - 1);
+    }
+
+    private void InitIntArray1(int value, int type = 1)
+    {
+        if (type == 1)
+        {
+            back = new int[N];
+            for (int i = 0; i < back.Length; i++)
+                back[i] = value;
+            return;
+        }
+        if (type == 2)
+        {
+            distance = new double[N + 1];
+            for (int i = 0; i < distance.Length; i++)
+                distance[i] = value;
+            distance[N]++;
+            return;
+        }
+    }
+
+    public void InitBoolArray1(bool value = false)
+    {
+        color1 = new bool[N];
+        for (int i = 0; i < color1.Length; i++)
+            color1[i] = value;
+    }
+
+    public void ReadGoMargin(string fname)
+    {
+        string[] lines = File.ReadAllLines(fname);
+        string[] line = lines[0].Split(' ');
+        nRow = int.Parse(line[0].Trim());
+        nCol = int.Parse(line[1].Trim());
+
+        N = nRow * nCol;
+        sNode = new Tuple<int, int>(Int32.Parse(line[2].Trim()) - 1, Int32.Parse(line[3].Trim()) - 1);
+        sVertex = Point2Num(sNode.Item1, sNode.Item2);
+
+        AdjacencyMatrix = new int[nRow, nCol];
+        eVertex = nRow * nCol;
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            line = lines[i].Split(' ');
+            for (int j = 0; j < line.Length; j++)
+            {
+                SetNode(i - 1, j, Int32.Parse(line[j].Trim()));
+            }
+        }
+    }
+
+    public void SetNode(int i, int j, int value)
+    {
+        if (i < 0 || i >= nRow || j < 0 || j >= nCol)
+        {
+            Console.WriteLine(String.Format("Ngoài phạm vi ({0}, {1})", i, j));
+            return;
+        }
+        AdjacencyMatrix[i, j] = value;
+    }
+
+    public int GetNode(int i, int j)
+    {
+        if (i < 0 || i >= nRow || j < 0 || j >= nCol)
+        {
+            Console.WriteLine(String.Format("Ngoài phạm vi ({0}, {1})", i, j));
+            return Int32.MinValue;
+        }
+        return (int)AdjacencyMatrix[i, j];
+    }
+
+    public int Point2Num(int i, int j)
+    {
+        return i * nCol + j;
+    }
+
+    public void Num2Point(int num, ref int i, ref int j)
+    {
+        i = num / nCol;
+        j = num % nCol;
+    }
+
+    public bool InBoard(int x, int y)
+    {
+        return (x >= 0) && (x < nRow) && (y >= 0) && (y < nCol);
+    }
+
+    public void PrintArray(int type = 1)
+    {
+        if (type == 1)
+        {
+            foreach (double d in distance)
+                Console.Write(String.Format("{0,-5}", d));
+            Console.WriteLine();
+            return;
+        }
+        if (type == 2)
+        {
+            foreach (int d in back)
+                Console.Write(String.Format("{0,-5}", d));
+            Console.WriteLine();
+            return;
+        }
+    }
+}
+
+#!markdown
+
+Chạy Bài 2
+
+#!csharp
+
+Bai02 graph = new Bai02();
+graph.GoMargin("RaBien.INP");
+
+#!markdown
+
+Interface Bài 3
+
+#!csharp
+
+internal interface Prim_MST
+{
+    void Prim_MST(string fname);
+}
+
+#!markdown
+
+Bài 3
+
+#!csharp
+
+using System;
+using System.IO;
+
+public class Bai03 : Graph, Prim_MST
+{
+   
+ public void Prim_MST(string fname)
+ {
+     ReadPrim_MST(fname); 
+     List<Edge> mst = Prim(); 
+     WriteReadPrim_MST(fname.Substring(0, fname.Length - 3) + "OUT", mst); 
+    
+ }
+ public void ReadPrim_MST(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);
+    string[] line = lines[0].Split(' ');
+
+    N = int.Parse(line[0].Trim());
+    numEdges = int.Parse(line[1].Trim());
+    Console.WriteLine("Number of vertices: " + N);
+    listWEdges = new List<Edge>();
+
+    AdjList1 = new List<List<int>>();
+    for (int i = 0; i < N; i++)
+    {
+        AdjList1.Add(new List<int>());
+    }
+
+    for (int i = 0; i < numEdges; i++)
+    {
+        line = lines[i + 1].Split(' ');
+        int v1 = int.Parse(line[0].Trim()) - 1;
+        int v2 = int.Parse(line[1].Trim()) - 1;
+        int w = int.Parse(line[2].Trim());
+
+        listWEdges.Add(new Edge(v1, v2, w));
+
+        AdjList1[v1].Add(v2);
+        AdjList1[v2].Add(v1);
+    }
+}
+
+public List<Edge> Prim()
+{
+    for (int i = 0; i < N; i++)
+    {
+        AdjList1.Add(new List<int>());
+    }
+
+    List<Edge> mst = new List<Edge>(); 
+    HashSet<int> visited = new HashSet<int>();
+    visited.Add(0); 
+
+    
+    for (int i = 1; i < N; i++)
+    {
+        Edge minEdge = null;
+        int minWeight = int.MaxValue;
+
+        foreach (int vertex in visited)
+        {
+            foreach (int neighbor in AdjList1[vertex])
+            {
+                if (!visited.Contains(neighbor))
+                {
+                    int weight = GetEdgeWeight(vertex, neighbor);
+                    if (weight != 0 && weight < minWeight)
+                    {
+                        minWeight = weight;
+                        minEdge = new Edge(vertex, neighbor, weight);
+                    }
+                }
+            }
+        }
+
+        if (minEdge != null)
+        {
+            mst.Add(minEdge);
+            visited.Add(minEdge.Destination);
+        }
+    }
+
+    return mst;
+}
+
+public int GetEdgeWeight(int source, int destination)
+{
+    foreach (var edge in listWEdges)
+    {
+        if ((edge.Source == source && edge.Destination == destination) ||
+            (edge.Source == destination && edge.Destination == source))
+        {
+            return edge.Weight;
+        }
+    }
+    return 0; 
+}
+
+public void WriteReadPrim_MST(string fname, List<Edge> list)
+{
+    using (StreamWriter file = new StreamWriter(fname))
+    {
+        string res = "";
+        int weight = 0;
+        foreach (Edge e in list)
+        {
+            res += $"{e.Source + 1} {e.Destination + 1} {e.Weight}\n";
+            weight += e.Weight;
+        }
+        file.WriteLine($"{list.Count} {weight}");
+        file.WriteLine(res);
+    }
+}
+    
+}
+
+#!markdown
+
+Chạy Bài 3
+
+#!csharp
+
+Bai03 graph = new Bai03();
+graph.Prim_MST("Prim.INP"); 
+
+#!markdown
+
+Interface Bài 4
+
+#!csharp
+
+internal interface SpanningTreeX
+{
+    void SpanningTreeX(string fname);
+}
+
+#!markdown
+
+Bài 4
+
+#!csharp
+
+using System;
+using System.IO;
+
+public class Bai04 : Graph, SpanningTreeX
+{
+public void SpanningTreeX(string fname)
+{
+    ReadSpanningTreeX(fname);
+    List<Edge> mst = FindMinimumSpanningTreeX();
+    WriteSpanningTreeX(fname.Substring(0, fname.Length - 3) + "OUT", mst); 
+}
+public void ReadSpanningTreeX(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);
+    string[] info = lines[0].Split(' ');
+    N = int.Parse(info[0]);
+    numEdges = int.Parse(info[1]);
+    x1 = int.Parse(info[2]);
+    Console.WriteLine("Số đỉnh: " + N);
+    listWEdges = new List<Edge>();
+
+    for (int i = 0; i < numEdges; i++)
+    {
+        string[] edgeInfo = lines[i + 1].Split(' ');
+        int v1 = int.Parse(edgeInfo[0]) - 1;
+        int v2 = int.Parse(edgeInfo[1]) - 1;
+        int w = int.Parse(edgeInfo[2]);
+        listWEdges.Add(new Edge(v1, v2, w));
+    }
+}
+
+public List<Edge> FindMinimumSpanningTreeX()
+{
+    List<Edge> mst = new List<Edge>(); 
+    HashSet<int> visited = new HashSet<int>(); 
+    visited.Add(0); 
+
+    listWEdges.Sort((x1, y) => x1.Weight.CompareTo(y.Weight));
+
+    int totalWeight = 0;
+
+    foreach (Edge edge in listWEdges)
+    {
+        if (edge.Weight >= x1) 
+        {
+            int v1 = edge.Source;
+            int v2 = edge.Destination;
+
+            bool v1InMST = visited.Contains(v1);
+            bool v2InMST = visited.Contains(v2);
+
+            if (v1InMST ^ v2InMST)
+            {
+                mst.Add(edge);
+                totalWeight += edge.Weight;
+                visited.Add(v1);
+                visited.Add(v2);
+            }
+            else if (!v1InMST && !v2InMST)
+            {
+                continue;
+            }
+        }
+    }
+
+    if (totalWeight >= x1)
+    {
+        return mst;
+    }
+    else
+    {
+        return new List<Edge>(); 
+    }
+}
+
+private void WriteSpanningTreeX(string fname, List<Edge> mst)
+{
+    using (StreamWriter file = new StreamWriter(fname))
+    {
+        if (mst.Count == 0)
+        {
+            file.WriteLine("-1"); 
+        }
+        else
+        {
+            int totalWeight = mst.Sum(edge => edge.Weight);
+            file.WriteLine(totalWeight); 
+            foreach (Edge edge in mst)
+            {
+                file.WriteLine($"{edge.Source + 1} {edge.Destination + 1} {edge.Weight}");
+            }
+        }
+    }
+}
+
+}
+
+#!markdown
+
+Chạy Bài 4
+
+#!csharp
+
+Bai04 graph = new Bai04();
+graph.SpanningTreeX("CayKhungX.INP");
