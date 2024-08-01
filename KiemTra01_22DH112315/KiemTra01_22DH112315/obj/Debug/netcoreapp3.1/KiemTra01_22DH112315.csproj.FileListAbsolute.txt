@@ -1,0 +1,14 @@
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\bin\Debug\netcoreapp3.1\KiemTra01_22DH112315.exe
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\bin\Debug\netcoreapp3.1\KiemTra01_22DH112315.deps.json
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\bin\Debug\netcoreapp3.1\KiemTra01_22DH112315.runtimeconfig.json
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\bin\Debug\netcoreapp3.1\KiemTra01_22DH112315.runtimeconfig.dev.json
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\bin\Debug\netcoreapp3.1\KiemTra01_22DH112315.dll
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\bin\Debug\netcoreapp3.1\KiemTra01_22DH112315.pdb
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\obj\Debug\netcoreapp3.1\KiemTra01_22DH112315.GeneratedMSBuildEditorConfig.editorconfig
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\obj\Debug\netcoreapp3.1\KiemTra01_22DH112315.AssemblyInfoInputs.cache
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\obj\Debug\netcoreapp3.1\KiemTra01_22DH112315.AssemblyInfo.cs
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\obj\Debug\netcoreapp3.1\KiemTra01_22DH112315.csproj.CoreCompileInputs.cache
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\obj\Debug\netcoreapp3.1\KiemTra01_22DH112315.dll
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\obj\Debug\netcoreapp3.1\KiemTra01_22DH112315.pdb
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\obj\Debug\netcoreapp3.1\KiemTra01_22DH112315.genruntimeconfig.cache
+D:\University Life\Lectures\Lí thuyết đồ thị\Thực hành\KiemTra01_22DH112315\KiemTra01_22DH112315\obj\Debug\netcoreapp3.1\KiemTra01_22DH112315.csproj.AssemblyReference.cache

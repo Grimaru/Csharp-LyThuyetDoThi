@@ -1,0 +1,14 @@
+C:\Users\To Trinh\Documents\Lý thuyết đồ thị\Thực hành\Buoi08\bin\Debug\Buoi08.exe.config
+C:\Users\To Trinh\Documents\Lý thuyết đồ thị\Thực hành\Buoi08\bin\Debug\Buoi08.exe
+C:\Users\To Trinh\Documents\Lý thuyết đồ thị\Thực hành\Buoi08\bin\Debug\Buoi08.pdb
+C:\Users\To Trinh\Documents\Lý thuyết đồ thị\Thực hành\Buoi08\obj\Debug\Buoi08.csproj.AssemblyReference.cache
+C:\Users\To Trinh\Documents\Lý thuyết đồ thị\Thực hành\Buoi08\obj\Debug\Buoi08.csproj.CoreCompileInputs.cache
+C:\Users\To Trinh\Documents\Lý thuyết đồ thị\Thực hành\Buoi08\obj\Debug\Buoi08.exe
+C:\Users\To Trinh\Documents\Lý thuyết đồ thị\Thực hành\Buoi08\obj\Debug\Buoi08.pdb
+D:\Learn\HK2 - Năm 2\LTĐT\Code\Buoi08\obj\Debug\Buoi08.csproj.AssemblyReference.cache
+D:\Learn\HK2 - Năm 2\LTĐT\Code\Buoi08\obj\Debug\Buoi08.csproj.CoreCompileInputs.cache
+D:\Learn\HK2 - Năm 2\LTĐT\Code\Buoi08\obj\Debug\Buoi08.exe
+D:\Learn\HK2 - Năm 2\LTĐT\Code\Buoi08\obj\Debug\Buoi08.pdb
+D:\Learn\HK2 - Năm 2\LTĐT\Code\Buoi08\bin\Debug\Buoi08.exe.config
+D:\Learn\HK2 - Năm 2\LTĐT\Code\Buoi08\bin\Debug\Buoi08.exe
+D:\Learn\HK2 - Năm 2\LTĐT\Code\Buoi08\bin\Debug\Buoi08.pdb
