@@ -1,0 +1,476 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!markdown
+
+Tạo lớp Graph
+
+#!csharp
+
+public class Graph
+{
+    public int N { get; set; }
+
+    public int M { get; set; }
+
+    public int A { get; set; }
+
+    protected  LinkedList<int>[] AdjacentList;
+
+    protected  bool[] visited;
+
+    public int[] pre;
+
+
+    public int start;
+
+    public int end;
+}
+
+#!markdown
+
+Interface Bài 01: BridgeBFS
+
+#!csharp
+
+internal interface BridgeBFS
+{
+    void BridgeBFS(string fname);
+    void ReadAdjListBFS1(string fname);
+    void WriteBridgeBFS(string fname, bool flag);
+    bool IsBridgeEdge();
+}
+
+#!markdown
+
+Tạo bài 1
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai01: Graph, BridgeBFS
+{
+
+    public void BridgeBFS(string fname)
+    {
+        ReadAdjListBFS1(fname);
+        bool flag = IsBridgeEdge();
+        WriteBridgeBFS(fname.Substring(0, fname.Length - 3) + "OUT", flag);
+    }
+
+    public void ReadAdjListBFS1(string fname)
+    {
+    string[] lines = System.IO.File.ReadAllLines(fname);
+
+    string[] line = lines[0].Split(' ');
+
+    N = Int32.Parse(line[0].Trim());
+    M = Int32.Parse(line[1].Trim());
+    A = Int32.Parse(line[2].Trim());
+    Console.WriteLine($"So dinh do thi : {N}");
+    AdjacentList = new LinkedList<int>[N];
+        for (int i = 0; i < N; i++)
+        {
+        AdjacentList[i] = new LinkedList<int>();
+        if (lines[i + 1].Length == 0)
+            continue;
+            line = lines[i + 1].Split(' ');
+            for (int j = 0; j < line.Length; j++)
+            {
+                int n = Int32.Parse(line[j].Trim());
+                AdjacentList[i].AddLast(n);
+            }
+        }
+    }
+    public void WriteBridgeBFS(string fname, bool flag)
+    {
+    string result = flag ? "YES" : "NO";
+    Console.WriteLine($"{result}");
+        using (StreamWriter file = new StreamWriter(fname))
+        {
+            file.WriteLine(result);
+        }
+    }
+
+public bool IsBridgeEdge()
+{
+    
+    for (int i = 0; i < N; i++)
+    {
+        foreach (int v in AdjacentList[i])
+        {
+            
+            AdjacentList[i].Remove(v);
+            AdjacentList[v].Remove(i);
+            List<List<int>> connectedComponents = ListConnectedComponents();
+            AdjacentList[i].AddLast(v);
+            AdjacentList[v].AddLast(i);
+
+            
+            if (connectedComponents.Count < N)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+private List<List<int>> ListConnectedComponents()
+{
+    List<List<int>> connectedcomp = new List<List<int>>();
+
+    visited = new bool[N + 1];
+
+    for (int i = 1; i <= N; i++)
+    {
+        
+        if (!visited[i])
+        {
+            List<int> list = BFS(i);           
+            connectedcomp.Add(list);     
+        }
+    }
+
+    return connectedcomp;   
+}
+
+private List<int> BFS(int s)
+{
+    List<int> list = new List<int>();
+    Queue<int> queue = new Queue<int>();         
+
+    visited[s] = true;          
+    queue.Enqueue(s);          
+
+    
+    while (queue.Count > 0)
+    {
+        int u = queue.Dequeue();                          
+        list.Add(u);                                  
+
+        foreach (int v in AdjacentList[u - 1])             
+        {
+            if (!visited[v])
+            {
+                visited[v] = true;
+                queue.Enqueue(v);
+            }
+        }
+    }
+
+    return list;       
+}
+
+private List<List<int>> CountConnectedComponents2()
+{
+    
+    List<List<int>> connectedComponents = new List<List<int>>();
+
+    
+    bool[] visited = new bool[N + 1];
+
+    
+    for (int i = 1; i <= N; i++)
+    {
+       
+        if (!visited[i])
+        {
+            List<int> component = DFS(i, visited);          
+            connectedComponents.Add(component);     
+        }
+    }
+
+    return connectedComponents;   
+}
+
+private List<int> DFS(int start, bool[] visited)
+{
+    List<int> component = new List<int>();
+    Stack<int> stack = new Stack<int>();          
+
+    visited[start] = true;         
+    stack.Push(start);           
+
+    
+    while (stack.Count > 0)
+    {
+        int u = stack.Pop();                           
+        component.Add(u);                                  
+
+        foreach (int v in AdjacentList[u - 1])             
+        {
+            if (!visited[v])
+            {
+                visited[v] = true;
+                stack.Push(v);
+            }
+        }
+    }
+
+    return component;       
+}
+
+}
+
+#!markdown
+
+Chạy Bài 1
+
+#!csharp
+
+Bai01 graph = new Bai01();
+graph.BridgeBFS("CanhCau.INP");  
+
+#!markdown
+
+Interface Bài 02: PathDFS
+
+#!csharp
+
+internal interface PathDFS
+{
+   
+    void ReadAdjacentListPathDFS2(string fname);
+    void PathDFS();
+    List<int> TracePathDFS();
+    void WritePathDFS(string fname, List<int> path);
+}
+
+#!markdown
+
+Tạo Bài 2
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai02: Graph, PathDFS
+{
+    public void PathDFS(string fname)
+    {
+        ReadAdjacentListPathDFS2(fname);
+        PathDFS();
+        List<int> list = TracePathDFS();
+        WritePathDFS(fname.Substring(0, fname.Length - 3) + "OUT", list);
+    }
+
+public void ReadAdjacentListPathDFS2(string fname)
+{
+    string[] lines = System.IO.File.ReadAllLines(fname);
+    string[] line = lines[0].Split(' ');
+    N = Int32.Parse(line[0].Trim());
+    start = Int32.Parse(line[1].Trim());
+    end = Int32.Parse(line[2].Trim());
+    Console.WriteLine($"So dinh do thi: {N}");
+    AdjacentList = new LinkedList<int>[N];
+    for (int i = 0; i < N; i++)
+    {
+        AdjacentList[i] = new LinkedList<int>();
+        if (lines[i + 1].Length == 0)
+            continue;
+        string[] v = lines[i + 1].Split(' ');
+        foreach (string n in v)
+        {
+            AdjacentList[i].AddLast(int.Parse(n));
+        }
+    }
+}
+
+public void WritePathDFS(string fname, List<int> list)
+{            
+    using (StreamWriter writer = new StreamWriter(fname))
+    {
+        writer.WriteLine(list.Count); 
+        foreach (int vertex in list)
+        {
+            writer.Write(vertex + " ");
+        }
+    }
+    Console.WriteLine(list.Count); 
+    foreach (int vertex in list)
+    {
+        Console.Write(vertex + " ");
+    }
+    Console.WriteLine(); 
+}
+
+ public void PathDFS()
+ {
+     
+     visited = new bool[N];
+     pre = new int[N];
+
+     
+     for (int i = 0; i < N; i++)
+     {
+         visited[i] = false;
+         pre[i] = -1;
+     }
+
+     
+     DFS(start);
+ }
+ private void DFS(int sVertex)
+ {
+     
+     visited[sVertex - 1] = true;
+
+     
+     foreach (int v in AdjacentList[sVertex - 1])
+     {
+        
+         if (!visited[v - 1])
+         {
+            
+             pre[v - 1] = sVertex;
+
+            
+             DFS(v);
+         }
+     }
+ }
+ private List<int> TracePathDFS()
+ {
+     List<int> path = new List<int>();
+
+     
+     int current= end;
+
+     
+     while (current != -1)
+     {
+         path.Add(current); 
+         current = pre[current- 1]; 
+     }
+
+     path.Reverse(); 
+     return path;
+ }
+}
+
+internal interface PathDFS{}
+
+#!markdown
+
+Chạy Bài 2
+
+#!csharp
+
+Bai02 graph = new Bai02();
+ graph.PathDFS("TimDuongDFS.INP"); 
+
+#!markdown
+
+Interface Bài 3: Cycle
+
+#!csharp
+
+internal interface Cycle
+{
+    bool IsCycle();
+    void WriteCycleResult(string fname, bool flag);
+}
+
+#!markdown
+
+Tạo Bài 3
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai03: Graph, Cycle
+{
+    public void Cycle(string fname)
+    {
+        ReadAdjListDFS3(fname);
+        bool flag = IsCycle();
+        WriteCycleResult(fname.Substring(0, fname.Length - 3) + "OUT", flag);
+    }
+
+public void ReadAdjListDFS3(string fname)
+{
+    string[] lines = System.IO.File.ReadAllLines(fname);
+    string[] line = lines[0].Split(' ');
+    N = int.Parse(line[0].Trim());
+
+    AdjacentList = new LinkedList<int>[N + 1];
+    Console.WriteLine($"So dinh do thi: {N}");
+    for (int i = 1; i <= N; i++)
+    {
+        AdjacentList[i] = new LinkedList<int>();
+        if (lines[i].Length == 0)
+            continue;
+        line = lines[i].Split(' ');
+        for (int j = 0; j < line.Length; j++)
+        {
+            int n = int.Parse(line[j].Trim());
+            AdjacentList[i].AddLast(n);
+        }
+    }
+}
+public void WriteCycleResult(string fname, bool flag)
+{
+    using (System.IO.StreamWriter file = new System.IO.StreamWriter(fname))
+    {
+        file.WriteLine(flag ? "YES" : "NO");
+    }
+    Console.WriteLine(flag ? "YES" : "NO");
+}
+public  bool IsCycle()
+{
+    
+    bool[] visited = new bool[N + 1];
+
+    
+    for (int i = 1; i <= N; i++)
+    {
+        
+        if (!visited[i])
+        {
+            
+            if (IsCycle(i, -1, visited))
+                return true;
+        }
+    }
+    return false;
+}
+
+private bool IsCycle(int current, int parent, bool[] visited)
+{
+    visited[current] = true;       
+
+    
+    foreach (int neighbor in AdjacentList[current])
+    {
+        
+        if (!visited[neighbor])
+        {
+           
+            if (IsCycle(neighbor, current, visited))
+                return true;
+        }
+        
+        else if (neighbor != parent)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+}
+
+#!markdown
+
+Chạy Bài 3
+
+#!csharp
+
+Bai03 graph = new Bai03();
+ graph.Cycle("ChuTrinh.INP");
