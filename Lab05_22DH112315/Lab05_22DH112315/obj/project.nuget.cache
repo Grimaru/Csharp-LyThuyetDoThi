@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "f9829fVGU8NtY9WW/HDgCgnr1Mlxc1uANguyeWs2L7ckscwpX9kSQWemnDl0ga/39ztcnhmLqMJz5Yt2cC+NsA==",
+  "success": true,
+  "projectFilePath": "D:\\University Life\\Lectures\\Lí thuyết đồ thị\\Thực hành\\Lab05_22DH112315\\Lab05_22DH112315\\Lab05_22DH112315.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\3.1.25\\microsoft.netcore.app.host.win-x64.3.1.25.nupkg.sha512"
+  ],
+  "logs": []
+}
