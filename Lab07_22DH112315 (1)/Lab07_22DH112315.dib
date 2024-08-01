@@ -1,0 +1,575 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!markdown
+
+Tạo lớp Graph
+
+#!csharp
+
+public class Graph
+{
+     // Số Đỉnh
+ public int N { get; set; }
+
+ // Số Cạnh
+ public int numEdges;
+
+ //Constant
+ protected const int INF = 1000;
+
+ //Max Weight
+ protected int maxWeight = 0;
+
+ // Danh Sách Cạnh
+ protected LinkedList<Tuple<int, int>> EdgeList;
+
+ //Danh Sách Kề
+ protected List<List<Tuple<int, int>>> AdjList;
+
+ // Ma trận kề
+ public int[,] AdjacencyMatrix;
+
+ //Floy Matrix
+ public int[,] floydMatrix;
+
+ // Bắt đầu
+ public int sVertex;
+
+ // Kết thúc
+public int eVertex;
+
+ // Đỉnh trung gian
+ public int iVertex;
+
+ public int[] color;
+ public int[] back;
+ public int[] dist;
+
+}
+
+#!markdown
+
+Interface Bài 1
+
+#!csharp
+
+internal interface ShortestPath
+{
+    void ShortestPath(string fname);
+}
+
+#!markdown
+
+Bài 1
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai01: Graph, ShortestPath
+{
+    public void ShortestPath(string fname)
+{
+    ReadAdjListSP(fname);
+    Dijkstra();
+    List<int> list = TracePath();
+    WriteShortestPath(fname.Substring(0, fname.Length - 3) + "OUT", list);
+}
+
+public void WriteShortestPath(string fname, List<int> res)
+{
+    Console.WriteLine("Ket qua cua bai 1: ");
+    using (System.IO.StreamWriter file = new System.IO.StreamWriter(fname))
+    {
+        if (res.Count == 3)
+        {
+            file.WriteLine(String.Format("Khong co duong di tu {0, -3} den {1, -3}", sVertex + 1, eVertex + 1));
+            System.Console.WriteLine($"Khong co duong di tu {0,-3} den {1,-3}", sVertex + 1, eVertex + 1);
+        }
+        else
+        {
+            file.WriteLine(String.Format("{0, -3}", dist[eVertex]));
+            System.Console.WriteLine(String.Format("{0, -3}", dist[eVertex]));
+            foreach (int v in res)
+            {
+                file.Write(String.Format("{0, -3}", v + 1));
+                System.Console.Write(String.Format("{0, -3}", v + 1));
+            }
+            file.WriteLine();
+            System.Console.WriteLine();
+        }
+    }
+}
+
+public void ReadAdjListSP(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);
+    string[] line = lines[0].Split(' ');
+    N = int.Parse(line[0].Trim());
+    numEdges = int.Parse(line[1].Trim());
+    sVertex = int.Parse(line[2].Trim()) - 1;
+    eVertex = int.Parse(line[3].Trim()) - 1;
+    
+    Console.WriteLine($"So dinh do thi: {N}");
+
+    AdjList = new List<List<Tuple<int, int>>>();
+    for (int i = 0; i < N; i++)
+        AdjList.Add(new List<Tuple<int, int>>());
+
+    for (int i = 0; i < numEdges; i++)
+    {
+        line = lines[i + 1].Trim().Split(' ');
+        int v1 = int.Parse(line[0].Trim()) - 1;
+        int v2 = int.Parse(line[1].Trim()) - 1;
+        int w = int.Parse(line[2].Trim());
+
+        AdjList[v1].Add(new Tuple<int, int>(v2, w));
+        AdjList[v2].Add(new Tuple<int, int>(v1, w));
+    }
+}
+
+ public  List<int> TracePath()
+ {
+     List<int> res = new List<int>();
+     int currentVertex = eVertex;
+     res.Add(currentVertex);
+
+     while (back[currentVertex] != -1 && currentVertex != sVertex)
+     {
+         currentVertex = back[currentVertex];
+         res.Insert(0, currentVertex);
+     }
+
+     if (currentVertex != sVertex)
+         res.Clear();
+
+     return res;
+ }
+
+ public  void Dijkstra()
+ {
+     InitIntArray(-1); 
+
+     int g = sVertex; 
+
+     dist[g] = 0; 
+     back[g] = -1; 
+     do
+     {
+         g = eVertex; 
+
+         for (int i = 0; i < N; i++)
+         {
+             if (color[i] == 0 && dist[g] > dist[i])
+                 g = i;
+         }
+         color[g] = 1;
+         if (dist[g] == INF || g == eVertex)
+             break;
+         foreach (Tuple<int, int> vv in AdjList[g])
+         {
+             if (color[vv.Item1] == 0)
+             {
+                 int d = dist[g] + vv.Item2;
+                 if (dist[vv.Item1] > d)
+                 {
+                     dist[vv.Item1] = d;
+                     back[vv.Item1] = g;
+                 }
+             }
+         }
+     } while (true); 
+ }
+
+ public void InitIntArray(int value = -2)
+ {
+     color = new int[N];
+     back = new int[N];
+     dist = new int[N];
+     for (int i = 0; i < N; i++)
+     {
+         color[i] = 0;
+         back[i] = value;
+         dist[i] = INF;
+     }
+ }
+}
+
+#!markdown
+
+Chạy Bài 1
+
+#!csharp
+
+Bai01 graph = new Bai01();
+graph.ShortestPath("Dijkstra.INP");   
+
+#!markdown
+
+Interface Bài 2
+
+#!csharp
+
+internal interface InterVertexShortesPath
+{
+    void InterVertexShortesPath(string fname);
+}
+
+#!markdown
+
+Bài 2
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai02: Graph, InterVertexShortesPath
+{
+    public void InterVertexShortesPath(string fname)
+    {
+        ReadAdjListIVSP(fname);
+        List<int> list = IVShortestPath();
+        WriteInterVertexShortesPath(fname.Substring(0, fname.Length - 3) + "OUT", list);
+    }
+public void WriteInterVertexShortesPath(string fname, List<int> res)
+{
+    Console.WriteLine("Ket qua cua bai 2: ");
+    using (System.IO.StreamWriter file = new System.IO.StreamWriter(fname))
+    {
+        if (res.Count == 3)
+        {
+            file.WriteLine(String.Format("Khong co duong di tu {0, -3} den {1, -3}", sVertex + 1, eVertex + 1));
+            System.Console.WriteLine($"Khong co duong di tu {0, -3} den {1, -3}", sVertex + 1, eVertex + 1);
+        }
+        else
+        {
+            file.WriteLine(String.Format("{0, -3}", res[res.Count - 1]));
+            System.Console.WriteLine(String.Format("{0, -3}", res[res.Count - 1]));
+            int index = 0;
+            foreach (int v in res)
+            {
+                if (index == (res.Count - 1))
+                    break;
+
+                file.Write(String.Format("{0, -3}", v + 1));
+                System.Console.Write(String.Format("{0, -3}", v + 1));
+                index++;
+            }
+            file.WriteLine();
+            System.Console.WriteLine();
+        }
+    }
+}
+ public void ReadAdjListIVSP(string fname)
+ {
+     string[] lines = File.ReadAllLines(fname);
+     string[] line = lines[0].Split(' ');
+     N = int.Parse(line[0].Trim());
+     numEdges = int.Parse(line[1].Trim());
+     sVertex = int.Parse(line[2].Trim()) - 1;
+     eVertex = int.Parse(line[3].Trim()) - 1;
+     iVertex = int.Parse(line[4].Trim()) - 1;
+
+     Console.WriteLine($"So dinh do thi: {N}");
+
+     AdjList = new List<List<Tuple<int, int>>>();
+     for (int i = 0; i < N; i++)
+         AdjList.Add(new List<Tuple<int, int>>());
+
+     for (int i = 0; i < numEdges; i++)
+     {
+         line = lines[i + 1].Trim().Split(' ');
+         int v1 = int.Parse(line[0].Trim()) - 1;
+         int v2 = int.Parse(line[1].Trim()) - 1;
+         int w = int.Parse(line[2].Trim());
+
+         AdjList[v1].Add(new Tuple<int, int>(v2, w));
+         AdjList[v2].Add(new Tuple<int, int>(v1, w));
+     }
+ }
+ public  void Dijkstra()
+ {
+     InitIntArray(-1); 
+
+     int g = sVertex; 
+
+     dist[g] = 0; 
+     back[g] = -1; 
+     do
+     {
+         g = eVertex; 
+
+         for (int i = 0; i < N; i++)
+         {
+             if (color[i] == 0 && dist[g] > dist[i])
+                 g = i;
+         }
+
+         color[g] = 1;
+
+         if (dist[g] == INF || g == eVertex)
+             break;
+
+         foreach (Tuple<int, int> vv in AdjList[g])
+         {
+             if (color[vv.Item1] == 0)
+             {
+                 int d = dist[g] + vv.Item2;
+                 if (dist[vv.Item1] > d)
+                 {
+                     dist[vv.Item1] = d;
+                     back[vv.Item1] = g;
+                 }
+             }
+         }
+     } while (true); 
+ }
+ public  List<int> TracePath()
+ {
+     List<int> res = new List<int>();
+     int currentVertex = eVertex;
+     res.Add(currentVertex);
+
+     while (back[currentVertex] != -1 && currentVertex != sVertex)
+     {
+         currentVertex = back[currentVertex];
+         res.Insert(0, currentVertex);
+     }
+
+     if (currentVertex != sVertex)
+         res.Clear();
+
+     return res;
+ }
+ public List<int> IVShortestPath()
+{
+    int temp = eVertex; 
+    eVertex = iVertex; 
+
+    
+    Dijkstra();
+
+    int distance = dist[eVertex]; 
+    List<int> res = TracePath(); 
+
+    eVertex = temp; 
+    temp = sVertex; 
+    sVertex = iVertex; 
+    for (int i = 0; i < N; i++)
+    {
+        if (!res.Contains(i + 1))
+        {
+            color[i] = 0;
+            back[i] = -2;
+            dist[i] = INF;
+        }
+    }
+
+    color[sVertex] = 0; 
+    SubDijkstra(); 
+    List<int> phase2 = TracePath(); 
+
+    distance += dist[eVertex]; 
+    iVertex = sVertex; 
+    sVertex = temp; 
+
+    res.RemoveAt(res.Count - 1); 
+
+    res.AddRange(phase2); 
+    res.Add(distance); 
+
+    return res; 
+}
+
+public void SubDijkstra()
+{
+    int g = sVertex; 
+    dist[g] = 0; 
+    do
+    {
+        g = eVertex; 
+        for (int i = 0; i < N; i++)
+        {
+            if ((color[i] == 0) && (dist[g] > dist[i]))
+                g = i;
+        }
+        color[g] = 1; 
+        if ((dist[g] == INF) || g == eVertex)
+            break; 
+        foreach (Tuple<int, int> vv in AdjList[g])
+        {
+            if (color[vv.Item1] == 0)
+            {
+                int d = dist[g] + vv.Item2;
+                if (dist[vv.Item1] > d)
+                {
+                    dist[vv.Item1] = d; 
+                    back[vv.Item1] = g; 
+                }
+            }
+        }
+    } while (true); 
+}
+public void InitIntArray(int value = -2)
+ {
+     color = new int[N];
+     back = new int[N];
+     dist = new int[N];
+     for (int i = 0; i < N; i++)
+     {
+         color[i] = 0;
+         back[i] = value;
+         dist[i] = INF;
+     }
+ }
+}
+
+#!markdown
+
+Chạy Bài 2
+
+#!csharp
+
+Bai02 graph = new Bai02();
+ graph.InterVertexShortesPath("NganNhatX.INP");
+
+#!markdown
+
+Interface Bài 3
+
+#!csharp
+
+internal interface ShortesPathFloyd
+{
+   void ShortesPathFloyd(string fname);
+}
+
+#!markdown
+
+Bài 3
+
+#!csharp
+
+using System;
+using System.IO;
+
+internal class Bai03: Graph, ShortesPathFloyd
+{
+public void ShortesPathFloyd(string fname)
+{
+    ReadMatrix2Matrix(fname);
+    FloydAlgorithm();
+    WriteFloydMatrix(fname.Substring(0, fname.Length - 3) + "OUT");
+}
+public void WriteFloydMatrix(string fname)
+{
+    string outFileName = fname.Substring(0, fname.Length - 3) + "OUT";
+    using (StreamWriter file = new StreamWriter(outFileName))
+    {
+        file.WriteLine(N);
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < N; j++)
+            {
+                if (floydMatrix[i, j] >= INF - maxWeight && floydMatrix[i, j] <= INF + maxWeight)
+                    file.Write("INF ");
+                else
+                    file.Write($"{floydMatrix[i, j]} ");
+            }
+            file.WriteLine();
+        }
+    }
+    string[] outLines = File.ReadAllLines(outFileName);
+    Console.WriteLine($"Ket qua:");
+    foreach (var line in outLines)
+    {
+        Console.WriteLine(line);
+    }
+}
+public  void ReadMatrix2Matrix(string fname)
+{
+    string[] lines = File.ReadAllLines(fname);  
+    N = int.Parse(lines[0].Trim());
+
+    Console.WriteLine($"So dinh do thi: {N}");
+
+    AdjacencyMatrix = new int[N, N];
+
+    for (int i = 1; i < lines.Length; i++)
+    {
+        string[] line = lines[i].Split(' ');
+        for (int j = 0; j < line.Length; j++) 
+        {
+            int value = Int32.Parse(line[j].Trim());
+
+            SetNode(i - 1, j, value);   
+            Console.Write(String.Format("{0, -3}", GetNode(i -1, j)));
+        }
+        Console.WriteLine();
+    }    
+}
+public int GetNode(int i, int j)
+{
+        if (i < 0 && i < N && j > -1 && j < N)
+        {
+        Console.WriteLine(String.Format("Bi ngoai pham vi ({0}, {1})", i, j));
+        return Int32.MinValue;  
+        }
+    return AdjacencyMatrix[i, j];   
+}
+
+public void SetNode(int i, int j, int value)
+{
+    if (i < 0 && i < N && j > -1 && j < N)
+        {
+        Console.WriteLine(String.Format("Bi ngoai pham vi ({0}, {1})", i, j));
+        return;
+    }
+    AdjacencyMatrix[i, j] = value;
+}
+ public void FloydAlgorithm()
+ {
+     floydMatrix = new int[N, N]; 
+
+     for (int i = 0; i < N; i++)
+     {
+         floydMatrix[i, i] = 0; 
+         for (int j = i + 1; j < N; j++)
+         {
+             floydMatrix[i, j] = INF; 
+             floydMatrix[j, i] = INF; 
+
+             if (AdjacencyMatrix[i, j] != 0)
+             {
+                 floydMatrix[i, j] = AdjacencyMatrix[i, j];
+                 floydMatrix[j, i] = AdjacencyMatrix[j, i];
+             }
+         }
+     }
+     for (int k = 0; k < N; k++)
+     {
+         for (int i = 0; i < N; i++)
+         {
+             for (int j = 0; j < N; j++)
+             {
+                 int d = floydMatrix[i, k] + floydMatrix[k, j];
+                 if (floydMatrix[i, j] > d)
+                     floydMatrix[i, j] = d;
+             }
+         }
+     }
+ }
+}
+
+#!markdown
+
+Chạy Bài 3
+
+#!csharp
+
+Bai03 graph = new Bai03();
+graph.ShortesPathFloyd("Floyd.INP");
